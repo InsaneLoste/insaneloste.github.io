@@ -13,6 +13,16 @@
       background-color: #f0f0f0;
       color: #333;
     }
+	
+	.big-button {
+		display: inline-block;
+		padding: 20px 40px; /* Adjust the padding to make the button bigger */
+		background-color: #3498db;
+		color: #fff;
+		text-decoration: none;
+		font-size: 20px; /* Adjust the font size as needed */
+		border-radius: 5px; /* Add rounded corners if desired */
+	  }
     
     h1, h2, h3, h4, h5, h6 {
       font-family: 'Your Font Name', sans-serif;
@@ -28,8 +38,9 @@
 <body>
   <h1 id="powers">Powers</h1>
 <!--<input id="indexInput" placeholder="Enter the power id...">-->
-<button onclick="getLiElement()">Get random</button>
+<button onclick="getLiElement()" class="big-button">Get random</button>
 <div style="margin-top: 8px" id="output"></div>
+<hr/>
 <ol id="myList">
 <li><a target="_blank" href="https://powerlisting.fandom.com/wiki/0th-Dimension_Physiology">0th-Dimension Physiology</a></li>
 <li><a target="_blank" href="https://powerlisting.fandom.com/wiki/0th_Dimension_Physiology">0th Dimension Physiology</a></li>
