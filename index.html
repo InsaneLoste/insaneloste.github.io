@@ -31,7 +31,7 @@ var triangleHeightScale = 3.3;
 var legLength = side / 2.4;
 var timerNewBalls = 10000;
 var timerNewObstacles = 5000;
-var timerNewPowers = 15000;
+var timerNewPowers = 20000;
 var obstacleDuration = timerNewObstacles * 12;
 var goalAnimationDuration = 2000;
 var curveDuration = 2500;
@@ -122,6 +122,11 @@ var scoreText3;
 var scoreText4;
 var timeText;
 var goalMp3;
+var bgMusic;
+var slowerSound;
+var fasterSound;
+var smallerSound;
+var biggerSound;
 var vel1 = 3;
 var vel2 = 3;
 var vel3 = 3;
@@ -152,6 +157,10 @@ function preload ()
 
     this.load.audio('goal.mp3', 'resources/goal2.mp3');
     this.load.audio('bg.mp3', 'resources/bg.mp3');
+    this.load.audio('smaller_sound', 'resources/smaller_sound.mp3');
+    this.load.audio('bigger_sound', 'resources/bigger_sound.mp3');
+    this.load.audio('faster_sound', 'resources/faster_sound.mp3');
+    this.load.audio('slower_sound', 'resources/slower_sound.mp3');
 }
 
 function create ()
@@ -193,14 +202,16 @@ function create ()
             'S': Phaser.Input.Keyboard.KeyCodes.S,
             'D': Phaser.Input.Keyboard.KeyCodes.D,
             'W': Phaser.Input.Keyboard.KeyCodes.W,
+
             'F': Phaser.Input.Keyboard.KeyCodes.F,
-            'C': Phaser.Input.Keyboard.KeyCodes.C,
-            'V': Phaser.Input.Keyboard.KeyCodes.V,
-            'B': Phaser.Input.Keyboard.KeyCodes.B,
-            'Y': Phaser.Input.Keyboard.KeyCodes.Y,
             'H': Phaser.Input.Keyboard.KeyCodes.H,
             'G': Phaser.Input.Keyboard.KeyCodes.G,
-            'J': Phaser.Input.Keyboard.KeyCodes.J
+            'T': Phaser.Input.Keyboard.KeyCodes.T,
+            
+            'J': Phaser.Input.Keyboard.KeyCodes.J,
+            'I': Phaser.Input.Keyboard.KeyCodes.I,
+            'K': Phaser.Input.Keyboard.KeyCodes.K,
+            'L': Phaser.Input.Keyboard.KeyCodes.L,
         });
 
         //  The objects in the game
@@ -276,7 +287,7 @@ function create ()
         this.physics.add.collider(balls, balls, ballsCollision, null, this);
         this.physics.add.collider(players, obstacles, playersObstaclesCollision, null, this);
         this.physics.add.collider(obstacles, obstacles);
-        this.physics.add.collider(balls, powers, getPower, null, this);
+        this.physics.add.collider(balls, powers, getPower, isPowerOk, this);
 
         //  Checks if the ball enters the goal
         this.physics.add.overlap(balls, goals, scoreGoal, null, this);
@@ -287,17 +298,34 @@ function create ()
         bgMusic.play({
             volume: 0.25 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
         });
+        slowerSound = this.sound.add('slower_sound');
+        fasterSound = this.sound.add('faster_sound');
+        smallerSound = this.sound.add('smaller_sound');
+        biggerSound = this.sound.add('bigger_sound');
 
         gameReady = true;
 
         if (debug) {
-            // Draw the triangle1
+            // Draw the triangles
             graphics = this.add.graphics();
             graphics.lineStyle(5, 0xff0000, 5);
             graphics.strokeTriangleShape(triangle1);
             graphics.strokeTriangleShape(triangle2);
             graphics.strokeTriangleShape(triangle3);
             graphics.strokeTriangleShape(triangle4);
+            // play each sound
+            setTimeout(function() {
+                slowerSound.play({ volume: 0.2 });
+            }, 1000);
+            setTimeout(function() {
+                fasterSound.play({ volume: 0.5 });
+            }, 2000);
+            setTimeout(function() {
+                smallerSound.play({ volume: 1.0 });
+            }, 3000);
+            setTimeout(function() {
+                biggerSound.play({ volume: 1.0 });
+            }, 4000);
         }
     }, this);
 
@@ -370,15 +398,15 @@ function movePlayer3(){
     // Apply velocity
     if (inputKeys.F.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x - small, player3.y)) {
         player3.setVelocityX(-large * vel3);
-    } else if (inputKeys.C.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x + small, player3.y)) {
+    } else if (inputKeys.H.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x + small, player3.y)) {
         player3.setVelocityX(large * vel3);
     } else {
         player3.setVelocityX(0);
     }
 
-    if (inputKeys.V.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x, player3.y - small)) {
+    if (inputKeys.T.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x, player3.y - small)) {
         player3.setVelocityY(-large * vel3);
-    } else if (inputKeys.B.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x, player3.y + small)) {
+    } else if (inputKeys.G.isDown && Phaser.Geom.Triangle.Contains(triangle3, player3.x, player3.y + small)) {
         player3.setVelocityY(large * vel3);
     } else {
         player3.setVelocityY(0);
@@ -391,17 +419,17 @@ function movePlayer4(){
     player4 = players.getChildren()[3];
 
     // Apply velocity
-    if (inputKeys.Y.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x - small, player4.y)) {
+    if (inputKeys.J.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x - small, player4.y)) {
         player4.setVelocityX(-large * vel4);
-    } else if (inputKeys.H.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x + small, player4.y)) {
+    } else if (inputKeys.L.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x + small, player4.y)) {
         player4.setVelocityX(large * vel4);
     } else {
         player4.setVelocityX(0);
     }
 
-    if (inputKeys.G.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x, player4.y - small)) {
+    if (inputKeys.I.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x, player4.y - small)) {
         player4.setVelocityY(-large * vel4);
-    } else if (inputKeys.J.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x, player4.y + small)) {
+    } else if (inputKeys.K.isDown && Phaser.Geom.Triangle.Contains(triangle4, player4.x, player4.y + small)) {
         player4.setVelocityY(large * vel4);
     } else {
         player4.setVelocityY(0);
@@ -519,41 +547,69 @@ function ballsObstaclesCollision(ball, obstacle) {
     }
 }
 
+function isPowerOk(ball, power) {
+    if (ball.lastPossibleScorer != null) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function getPower(ball, power) {
     if (ball.lastPossibleScorer != null) {
         currentPlayer = players.getChildren().find(player => player.name == ball.lastPossibleScorer.name);
         if (power.texture.key == 'smaller') {
             if (currentPlayer.displayWidth == medium) {
                 currentPlayer.setDisplaySize(small, small);
+                smallerSound.play();
             } else if (currentPlayer.displayWidth == large) {
                 currentPlayer.setDisplaySize(medium, medium);
+                smallerSound.play();
             }
         } else if (power.texture.key == 'bigger') {
             if (currentPlayer.displayWidth == medium) {
                 currentPlayer.setDisplaySize(large, large);
+                biggerSound.play();
             } else if (currentPlayer.displayWidth == small) {
                 currentPlayer.setDisplaySize(medium, medium);
+                biggerSound.play();
             }  
         } else if (power.texture.key == 'faster') {
             if (currentPlayer.name == "player1") {
                 vel1 += 2;
                 if (vel1 > 5) {
                     vel1 = 5;
+                } else {
+                    fasterSound.play({
+                        volume: 0.5 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player2") {
                 vel2 += 2;
                 if (vel2 > 5) {
                     vel2 = 5;
+                } else {
+                    fasterSound.play({
+                        volume: 0.5 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player3") {
                 vel3 += 2;
                 if (vel3 > 5) {
                     vel3 = 5;
+                } else {
+                    fasterSound.play({
+                        volume: 0.5 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player4") {
                 vel4 += 2;
                 if (vel4 > 5) {
                     vel4 = 5;
+                } else {
+                    fasterSound.play({
+                        volume: 0.5 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             }
 
@@ -562,21 +618,37 @@ function getPower(ball, power) {
                 vel1 -= 2;
                 if (vel1 < 1) {
                     vel1 = 1;
+                } else {
+                    slowerSound.play({
+                        volume: 0.2 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player2") {
                 vel2 -= 2;
                 if (vel2 < 1) {
                     vel2 = 1;
+                } else {
+                    slowerSound.play({
+                        volume: 0.2 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player3") {
                 vel3 -= 2;
                 if (vel3 < 1) {
                     vel3 = 1;
+                } else {
+                    slowerSound.play({
+                        volume: 0.2 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             } else if (currentPlayer.name == "player4") {
                 vel4 -= 2;
                 if (vel4 < 1) {
                     vel4 = 1;
+                } else {
+                    slowerSound.play({
+                        volume: 0.2 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+                    });
                 }
             }
         }
