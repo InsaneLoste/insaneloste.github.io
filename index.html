@@ -21,6 +21,7 @@
 
 var debug = false;
 var gameReady = false;
+var self;
 
 var side = window.innerHeight - 6;
 var tiny = side / 126;
@@ -166,173 +167,178 @@ function preload ()
 function create ()
 {
 
+    self = this;
+
     // Create the "Play" button
     var playButton = this.add.text(side / 2, side / 2, 'Play', { fill: '#ffffff' }).setOrigin(0.5);
-    playButton.setInteractive();
+    // playButton.setInteractive();
 
     // Start everything when the "Play" button is clicked
-    playButton.on('pointerdown', function() {
+    document.addEventListener("keydown", function() {
 
-        // Remove or hide the "Play" button
-        playButton.destroy();
+        if (event.keyCode === 13) {
+                
+            // Remove or hide the "Play" button
+            playButton.destroy();
 
-        //  Background
-        var backgroundImage = this.add.image(side / 2, side / 2, 'field');
-        var scaleX = side / backgroundImage.width;
-        var scaleY = side / backgroundImage.height;
-        backgroundImage.setScale(scaleX, scaleY);
+            //  Background
+            var backgroundImage = self.add.image(side / 2, side / 2, 'field');
+            var scaleX = side / backgroundImage.width;
+            var scaleY = side / backgroundImage.height;
+            backgroundImage.setScale(scaleX, scaleY);
 
-        //  The scores
-        var topPosition = side / 2 - side / 2 / 2 - small;
-        var bottomPosition = side / 2 + side / 2 / 2 + small;
-        var leftPosition = side / 2 - side / 2 / 2 - small;
-        var rightPosition = side / 2 + side / 2 / 2 + small;
-        scoreText1 = this.add.text(side / 2, bottomPosition, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
-        scoreText2 = this.add.text(side / 2, topPosition, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
-        scoreText3 = this.add.text(rightPosition, side / 2, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
-        scoreText4 = this.add.text(leftPosition, side / 2, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
+            //  The scores
+            var topPosition = side / 2 - side / 2 / 2 - small;
+            var bottomPosition = side / 2 + side / 2 / 2 + small;
+            var leftPosition = side / 2 - side / 2 / 2 - small;
+            var rightPosition = side / 2 + side / 2 / 2 + small;
+            scoreText1 = self.add.text(side / 2, bottomPosition, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
+            scoreText2 = self.add.text(side / 2, topPosition, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
+            scoreText3 = self.add.text(rightPosition, side / 2, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
+            scoreText4 = self.add.text(leftPosition, side / 2, '0', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
 
-        // Timer to the end of the match (5 mins)
-        timeText = this.add.text(side / 2, side / 2, '05   00', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
+            // Timer to the end of the match (5 mins)
+            timeText = self.add.text(side / 2, side / 2, '05   00', { font: medium + 'px Verdana', fill: 'white' }).setOrigin(0.5);
 
-        //  Input Events
-        cursors = this.input.keyboard.createCursorKeys();
-        inputKeys = this.input.keyboard.addKeys({
-            'A': Phaser.Input.Keyboard.KeyCodes.A,
-            'S': Phaser.Input.Keyboard.KeyCodes.S,
-            'D': Phaser.Input.Keyboard.KeyCodes.D,
-            'W': Phaser.Input.Keyboard.KeyCodes.W,
+            //  Input Events
+            cursors = self.input.keyboard.createCursorKeys();
+            inputKeys = self.input.keyboard.addKeys({
+                'A': Phaser.Input.Keyboard.KeyCodes.A,
+                'S': Phaser.Input.Keyboard.KeyCodes.S,
+                'D': Phaser.Input.Keyboard.KeyCodes.D,
+                'W': Phaser.Input.Keyboard.KeyCodes.W,
 
-            'F': Phaser.Input.Keyboard.KeyCodes.F,
-            'H': Phaser.Input.Keyboard.KeyCodes.H,
-            'G': Phaser.Input.Keyboard.KeyCodes.G,
-            'T': Phaser.Input.Keyboard.KeyCodes.T,
-            
-            'J': Phaser.Input.Keyboard.KeyCodes.J,
-            'I': Phaser.Input.Keyboard.KeyCodes.I,
-            'K': Phaser.Input.Keyboard.KeyCodes.K,
-            'L': Phaser.Input.Keyboard.KeyCodes.L,
-        });
+                'F': Phaser.Input.Keyboard.KeyCodes.F,
+                'H': Phaser.Input.Keyboard.KeyCodes.H,
+                'G': Phaser.Input.Keyboard.KeyCodes.G,
+                'T': Phaser.Input.Keyboard.KeyCodes.T,
+                
+                'J': Phaser.Input.Keyboard.KeyCodes.J,
+                'I': Phaser.Input.Keyboard.KeyCodes.I,
+                'K': Phaser.Input.Keyboard.KeyCodes.K,
+                'L': Phaser.Input.Keyboard.KeyCodes.L,
+            });
 
-        //  The objects in the game
-        balls = this.physics.add.group();
-        obstacles = this.physics.add.group();
-        goals = this.physics.add.group();
-        players = this.physics.add.group();
-        goals = this.physics.add.staticGroup();
-        powers = this.physics.add.group();
+            //  The objects in the game
+            balls = self.physics.add.group();
+            obstacles = self.physics.add.group();
+            goals = self.physics.add.group();
+            players = self.physics.add.group();
+            goals = self.physics.add.staticGroup();
+            powers = self.physics.add.group();
 
-        physicsRef = this.physics;
+            physicsRef = self.physics;
 
-        players.create(side / 2, side - large, 'player1').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
-        players.create(side / 2, large, 'player2').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
-        players.create(side - large, side / 2, 'player3').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
-        players.create(large, side / 2, 'player4').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
-        players.getChildren()[0].name = "player1";
-        players.getChildren()[1].name = "player2";
-        players.getChildren()[2].name = "player3";
-        players.getChildren()[3].name = "player4";
+            players.create(side / 2, side - large, 'player1').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
+            players.create(side / 2, large, 'player2').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
+            players.create(side - large, side / 2, 'player3').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
+            players.create(large, side / 2, 'player4').setDisplaySize(medium, medium).setCollideWorldBounds(true).setBounce(0);
+            players.getChildren()[0].name = "player1";
+            players.getChildren()[1].name = "player2";
+            players.getChildren()[2].name = "player3";
+            players.getChildren()[3].name = "player4";
 
-        goals.create(side / 2, side - (tiny / 2), 'goal_sud').setDisplaySize(large*4, tiny).refreshBody();
-        goals.create(side / 2, tiny / 2, 'goal_nord').setDisplaySize(large*4, tiny).refreshBody();
-        goals.create(side - (tiny / 2), side / 2, 'goal_est').setDisplaySize(tiny, large*4).refreshBody();
-        goals.create(tiny / 2, side / 2, 'goal_ovest').setDisplaySize(tiny, large*4).refreshBody();
-        goals.getChildren()[0].name = "player1";
-        goals.getChildren()[1].name = "player2";
-        goals.getChildren()[2].name = "player3";
-        goals.getChildren()[3].name = "player4";
+            goals.create(side / 2, side - (tiny / 2), 'goal_sud').setDisplaySize(large*4, tiny).refreshBody();
+            goals.create(side / 2, tiny / 2, 'goal_nord').setDisplaySize(large*4, tiny).refreshBody();
+            goals.create(side - (tiny / 2), side / 2, 'goal_est').setDisplaySize(tiny, large*4).refreshBody();
+            goals.create(tiny / 2, side / 2, 'goal_ovest').setDisplaySize(tiny, large*4).refreshBody();
+            goals.getChildren()[0].name = "player1";
+            goals.getChildren()[1].name = "player2";
+            goals.getChildren()[2].name = "player3";
+            goals.getChildren()[3].name = "player4";
 
-        addBall();
+            addBall();
 
-        this.time.addEvent({
-            delay: timerNewBalls,
-            callback: addBall,
-            callbackScope: this,
-            loop: true
-        });
+            self.time.addEvent({
+                delay: timerNewBalls,
+                callback: addBall,
+                callbackScope: self,
+                loop: true
+            });
 
-        this.time.addEvent({
-            delay: timerNewObstacles,
-            callback: addObstacle,
-            callbackScope: this,
-            loop: true
-        });
+            self.time.addEvent({
+                delay: timerNewObstacles,
+                callback: addObstacle,
+                callbackScope: self,
+                loop: true
+            });
 
-        this.time.addEvent({
-            delay: timerNewPowers,
-            callback: addPower,
-            callbackScope: this,
-            loop: true
-        });
+            self.time.addEvent({
+                delay: timerNewPowers,
+                callback: addPower,
+                callbackScope: self,
+                loop: true
+            });
 
-        this.time.addEvent({
-            delay: 1000,
-            callback: function() {
-                if (gameOver) return;
-                var minutes = Math.floor(gameTime / 60000);
-                var seconds = Math.floor(gameTime / 1000) % 60;  
-                timeText.setText(minutes.toString().padStart(2, '0') + '   ' + seconds.toString().padStart(2, '0'));
-                if (minutes == 0 && seconds == 0) {
-                    endGame();
-                }
-                gameTime -= 1000;
-            },
-            callbackScope: this,
-            loop: true
-        })
+            self.time.addEvent({
+                delay: 1000,
+                callback: function() {
+                    if (gameOver) return;
+                    var minutes = Math.floor(gameTime / 60000);
+                    var seconds = Math.floor(gameTime / 1000) % 60;  
+                    timeText.setText(minutes.toString().padStart(2, '0') + '   ' + seconds.toString().padStart(2, '0'));
+                    if (minutes == 0 && seconds == 0) {
+                        endGame();
+                    }
+                    gameTime -= 1000;
+                },
+                callbackScope: self,
+                loop: true
+            })
 
-        //  Collisions
-        this.physics.add.collider(balls, obstacles, ballsObstaclesCollision, null, this);
-        this.physics.add.collider(balls, players, addPossibleScorer, null, this);
-        this.physics.add.collider(balls, balls, ballsCollision, null, this);
-        this.physics.add.collider(players, obstacles, playersObstaclesCollision, null, this);
-        this.physics.add.collider(obstacles, obstacles);
-        this.physics.add.collider(balls, powers, getPower, isPowerOk, this);
+            //  Collisions
+            self.physics.add.collider(balls, obstacles, ballsObstaclesCollision, null, self);
+            self.physics.add.collider(balls, players, addPossibleScorer, null, self);
+            self.physics.add.collider(balls, balls, ballsCollision, null, self);
+            self.physics.add.collider(players, obstacles, playersObstaclesCollision, null, self);
+            self.physics.add.collider(obstacles, obstacles);
+            self.physics.add.collider(balls, powers, getPower, isPowerOk, self);
 
-        this.physics.add.collider(players, triangle1);
-        this.physics.add.collider(players, triangle2);
-        this.physics.add.collider(players, triangle3);
-        this.physics.add.collider(players, triangle4);
+            self.physics.add.collider(players, triangle1);
+            self.physics.add.collider(players, triangle2);
+            self.physics.add.collider(players, triangle3);
+            self.physics.add.collider(players, triangle4);
 
-        //  Checks if the ball enters the goal
-        this.physics.add.overlap(balls, goals, scoreGoal, null, this);
+            //  Checks if the ball enters the goal
+            self.physics.add.overlap(balls, goals, scoreGoal, null, self);
 
-        // Sounds
-        goalMp3 = this.sound.add('goal.mp3');
-        bgMusic = this.sound.add('bg.mp3', { loop: true });
-        bgMusic.play({
-            volume: 0.25 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
-        });
-        slowerSound = this.sound.add('slower_sound');
-        fasterSound = this.sound.add('faster_sound');
-        smallerSound = this.sound.add('smaller_sound');
-        biggerSound = this.sound.add('bigger_sound');
+            // Sounds
+            goalMp3 = self.sound.add('goal.mp3');
+            bgMusic = self.sound.add('bg.mp3', { loop: true });
+            bgMusic.play({
+                volume: 0.25 // Adjust volume level between 0 and 1 (0 is silent, 1 is full volume)
+            });
+            slowerSound = self.sound.add('slower_sound');
+            fasterSound = self.sound.add('faster_sound');
+            smallerSound = self.sound.add('smaller_sound');
+            biggerSound = self.sound.add('bigger_sound');
 
-        gameReady = true;
+            gameReady = true;
 
-        if (debug) {
-            // Draw the triangles
-            graphics = this.add.graphics();
-            graphics.lineStyle(5, 0xff0000, 5);
-            graphics.strokeTriangleShape(triangle1);
-            graphics.strokeTriangleShape(triangle2);
-            graphics.strokeTriangleShape(triangle3);
-            graphics.strokeTriangleShape(triangle4);
-            // play each sound
-            setTimeout(function() {
-                slowerSound.play({ volume: 0.2 });
-            }, 1000);
-            setTimeout(function() {
-                fasterSound.play({ volume: 0.5 });
-            }, 2000);
-            setTimeout(function() {
-                smallerSound.play({ volume: 1.0 });
-            }, 3000);
-            setTimeout(function() {
-                biggerSound.play({ volume: 1.0 });
-            }, 4000);
+            if (debug) {
+                // Draw the triangles
+                graphics = self.add.graphics();
+                graphics.lineStyle(5, 0xff0000, 5);
+                graphics.strokeTriangleShape(triangle1);
+                graphics.strokeTriangleShape(triangle2);
+                graphics.strokeTriangleShape(triangle3);
+                graphics.strokeTriangleShape(triangle4);
+                // play each sound
+                setTimeout(function() {
+                    slowerSound.play({ volume: 0.2 });
+                }, 1000);
+                setTimeout(function() {
+                    fasterSound.play({ volume: 0.5 });
+                }, 2000);
+                setTimeout(function() {
+                    smallerSound.play({ volume: 1.0 });
+                }, 3000);
+                setTimeout(function() {
+                    biggerSound.play({ volume: 1.0 });
+                }, 4000);
+            }
         }
-    }, this);
+    }, self);
 
 }
 
