@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Learning</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        label {
+            flex: 1;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"] {
+            flex: 2;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: inline-block;
+            background: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        #copyButton {
+            display: none;
+            margin-top: 10px;
+            background: #28a745;
+        }
+        #copyButton:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <label for="language">Language target</label>
+            <input type="text" id="language" value="Italian">
+        </div>    
+        <div class="row">
+            <label for="language_s">Language source</label>
+            <input type="text" id="language_s" value="Spanish">
+        </div>
+        <div class="row">
+            <label for="word">Max words</label>
+            <input type="number" id="word" value="10">
+        </div>
+        <div class="row">
+            <label for="topN">Top-N words</label>
+            <input type="number" id="topN" value="20000">
+        </div>
+        <div class="row">
+            <label for="onlyK">Context length</label>
+            <input type="number" id="onlyK" value="10">
+        </div>
+        <div class="row">
+            <button id="getButton">Get</button>
+        </div>
+        <hr/>
+		<button id="copyButton">Copy to Clipboard</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function getRandomElements(arr, num) {
+            const shuffled = arr.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, num);
+        }
+
+        document.getElementById('getButton').addEventListener('click', function() {
+            const language = document.getElementById('language').value;
+            const source = document.getElementById('language_s').value;
+            const max_word = document.getElementById('word').value;
+            const topN = parseInt(document.getElementById('topN').value);
+            const onlyK = parseInt(document.getElementById('onlyK').value);
+            
+            fetch('word_count.json')
+                .then(response => response.json())
+                .then(data => {
+                    const topWords = Object.keys(data)
+                        .sort((a, b) => data[b] - data[a])
+                        .slice(0, topN);
+                    
+                    const randomTopKWords = getRandomElements(topWords, onlyK);
+
+                    let resultHTML = `
+                        <div>
+                            <h2>Welcome to the Language Translation Practice!</h2>
+                            <p><strong>Objective:</strong><br>To help improve translation skills between two languages through an interactive and iterative process.</p>
+                            <p><strong>Instructions:</strong></p>
+                            <ol>
+                                <li><strong>Initial Setup:</strong><br>You will be given a context in the form of a list of words. You can use part of it for inspiration.</li>
+                                <li><strong>Sentence Generation:</strong><br>You will generate a sentence in ${source} of at most ${max_word} words based on the provided context.</li>
+                                <li><strong>My Task:</strong><br>Translate the given sentence from ${source} to ${language}.</li>
+                                <li><strong>Evaluation and Correction:</strong><br>After I provide my translation, you will evaluate it for accuracy. If there are any errors, you will provide corrections to help me understand and learn.</li>
+                                <li><strong>Repetition:</strong><br>You will then give me another sentence for translation. This process will continue iteratively to help me practice and improve.</li>
+                            </ol>
+                            <p><strong>Let's get started!</strong></p>
+                            <p><strong>Context:</strong></p>
+                            <ul>
+                    `;
+                    randomTopKWords.forEach(word => {
+                        resultHTML += `<li>${word}</li>`;
+                    });
+                    resultHTML += `</ul>
+                        </div>
+                    `;
+                    
+                    document.getElementById('results').innerHTML = resultHTML;
+                    document.getElementById('copyButton').style.display = 'block';
+                })
+                .catch(error => console.error('Error fetching JSON:', error));
+        });
+
+        document.getElementById('copyButton').addEventListener('click', function() {
+            const results = document.getElementById('results').innerText;
+            const textArea = document.createElement('textarea');
+            textArea.value = results;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        });
+    </script>
+</body>
+</html>
