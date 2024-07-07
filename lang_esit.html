@@ -72,6 +72,12 @@
         #copyButton:hover {
             background: #218838;
         }
+        .features {
+            margin-bottom: 15px;
+        }
+        .features label {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -85,22 +91,42 @@
             <input type="text" id="language_s" value="Spanish">
         </div>
         <div class="row">
+            <button id="swapButton">Swap Languages</button>
+        </div>
+        <div class="row">
             <label for="word">Max words</label>
-            <input type="number" id="word" value="10">
+            <input type="number" id="word" value="15">
         </div>
         <div class="row">
             <label for="topN">Top-N words</label>
-            <input type="number" id="topN" value="20000">
+            <input type="number" id="topN" value="5000">
         </div>
         <div class="row">
             <label for="onlyK">Context length</label>
             <input type="number" id="onlyK" value="10">
         </div>
+        <div class="features">
+            <label><input type="checkbox" class="feature" checked> Present tenses</label>
+            <label><input type="checkbox" class="feature" checked> Future tenses</label>
+            <label><input type="checkbox" class="feature" checked> Past tenses</label>
+            <label><input type="checkbox" class="feature" checked> Hypothetical tenses</label>
+            <label><input type="checkbox" class="feature" checked> Adjectives</label>
+            <label><input type="checkbox" class="feature" checked> Pronouns</label>
+            <label><input type="checkbox" class="feature" checked> Use of prepositions</label>
+            <label><input type="checkbox" class="feature" checked> Questions and commands</label>
+            <label><input type="checkbox" class="feature" checked> Singular</label>
+            <label><input type="checkbox" class="feature" checked> Plural</label>
+            <label><input type="checkbox" class="feature" checked> Comparisons</label>
+            <label><input type="checkbox" class="feature" checked> Adverbs</label>
+            <label><input type="checkbox" class="feature" checked> Common expressions</label>
+            <label><input type="checkbox" class="feature" checked> Negative sentences</label>
+            <label><input type="checkbox" class="feature" checked> Subordinate clauses</label>
+        </div>
         <div class="row">
             <button id="getButton">Get</button>
         </div>
         <hr/>
-		<button id="copyButton">Copy to Clipboard</button>
+        <button id="copyButton">Copy to Clipboard</button>
         <div id="results"></div>
     </div>
 
@@ -110,13 +136,23 @@
             return shuffled.slice(0, num);
         }
 
+        document.getElementById('swapButton').addEventListener('click', function() {
+            const language = document.getElementById('language').value;
+            const source = document.getElementById('language_s').value;
+            document.getElementById('language').value = source;
+            document.getElementById('language_s').value = language;
+        });
+
         document.getElementById('getButton').addEventListener('click', function() {
             const language = document.getElementById('language').value;
             const source = document.getElementById('language_s').value;
             const max_word = document.getElementById('word').value;
             const topN = parseInt(document.getElementById('topN').value);
             const onlyK = parseInt(document.getElementById('onlyK').value);
-            
+
+            const features = Array.from(document.querySelectorAll('.feature:checked'))
+                .map(checkbox => checkbox.parentElement.textContent.trim());
+
             fetch('word_count.json')
                 .then(response => response.json())
                 .then(data => {
@@ -138,10 +174,24 @@
                                 <li><strong>Evaluation and Correction:</strong><br>After I provide my translation, you will evaluate it for accuracy. If there are any errors, you will provide corrections to help me understand and learn.</li>
                                 <li><strong>Repetition:</strong><br>You will then give me another sentence for translation. This process will continue iteratively to help me practice and improve.</li>
                             </ol>
-                            <p><strong>Let's get started!</strong></p>
+                    `;
+					
+					if (features.length > 0) {
+                        resultHTML += `
+                            <p><strong>When you generate a sentence, you can decide whether to include any of the following features:</strong></p>
+                            <ul>
+                        `;
+                        features.forEach(feature => {
+                            resultHTML += `<li>${feature}</li>`;
+                        });
+                        resultHTML += `</ul>`;
+                    }
+					
+					resultHTML += `<p><strong>Let's get started!</strong></p>
                             <p><strong>Context:</strong></p>
                             <ul>
-                    `;
+					`;
+					
                     randomTopKWords.forEach(word => {
                         resultHTML += `<li>${word}</li>`;
                     });
