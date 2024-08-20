@@ -127,14 +127,17 @@ function playNextMatch() {
 
     const match = matches[matchIndex];
     const matchDiv = document.createElement("div");
+	
+	let fighter1 = Math.random() < 0.5 ? "1" : "2";
+	let fighter2 = fighter1 === "1" ? "2" : "1";
 
     const matchText = `
 <strong>Combattente 1:</strong> ${match[0].name} (${match[0].ability})<br>
 <strong>Combattente 2:</strong> ${match[1].name} (${match[1].ability})<br>
 <b>Descrivi lo scontro seguendo questi 7 passaggi:</b>
 1. Descrivi come inizia il combattimento.<br>
-2. Dettaglia la prima mossa significativa del Combattente 1.<br>
-3. Descrivi la reazione del Combattente 2 e la sua controffensiva.<br>
+2. Dettaglia la prima mossa significativa del Combattente ` + fighter1 + `<br>
+3. Descrivi la reazione del Combattente ` + fighter2 + ` e la sua controffensiva.<br>
 4. Narra un punto di svolta in favore di uno dei due combattenti.<br>
 5. Descrivi il tentativo di ribaltare la situazione da parte dell'altro combattente.<br>
 6. Spiega come si arriva alla conclusione dello scontro.<br>
