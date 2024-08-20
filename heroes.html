@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genera Torneo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+    <div class="container">
+        <h1 class="mb-4">Genera Torneo</h1>
+
+        <div class="container mt-4">
+			<textarea id="participantsInput" class="form-control" rows="26">Arzos,Esegue scatti fulminei e di brevi distanze
+Bitor,Allunga le braccia con consistenza di corteccia d'albero
+Crasis,Balza in cielo e vola per brevi tratti
+Dorus,Ha una forza sovraumana
+Ekos,Stordisce gli avversari con la sua voce
+Fitan,Rotea su se stesso e usa le sue braccia come arma tagliente
+Ganden,Diventa invisibile per brevi periodi
+Holas,Controlla e genera fiamme con il suo corpo
+Izy,Controlla e genera ghiaccio con il suo corpo
+Jax,Controlla e genera acqua con il suo corpo
+Kodri,Controlla e genera elettricità con il suo corpo
+Lumia,Genera luce abbagliante
+Mut,Secerne una sostanza viscosa
+Nobies,Si ingrandisce e rimpicciolisce
+Omi,Genera illusioni
+Pitra,Muove oggetti con la telecinesi
+Quiry,Canta in maniera ipnotica
+Rais,Crea oggetti
+Sira,Genera e spara proiettili con il suo corpo
+Tord,Controlla e genera correnti d'aria con il suo corpo
+Uxis,Ha una agilità sovraumana
+Vazar,Assorbe energia vitale
+Wor,Ha una resistenza sovraumana
+Xodo,Cammina su qualunque parete
+Yasa,Genera copie di sè stesso
+Zirt,Crea oscurità e ha visione notturna</textarea>
+			<button id="generateButton" class="btn btn-primary mt-2">Genera torneo</button>
+			<button id="saveButton" class="btn btn-secondary mt-2">Salva torneo</button>
+			<button id="loadButton" class="btn btn-secondary mt-2">Carica torneo</button>
+			<span id="matchCounter" class="mt-2">Scontri giocati: 0/0</span>
+		</div>
+		<div id="tournament" class="container mt-4">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Abilità</th>
+					<th>Punti</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Le righe della tabella saranno aggiunte dinamicamente -->
+			</tbody>
+		</table>
+	</div>
+
+    </div>
+
+    <!-- Bootstrap JS (optional for some interactive components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+let participants = [];
+let matches = [];
+let matchIndex = 0;
+
+function generateTournament() {
+    const input = document.getElementById('participantsInput').value;
+    const lines = input.split('\n');
+    participants = lines.map(line => {
+        const [name, ability] = line.split(',');
+        return { name: name.trim(), ability: ability.trim(), points: 0 };
+    });
+
+    // Genera tutti i possibili incontri nel girone
+    matches = [];
+    for (let i = 0; i < participants.length; i++) {
+        for (let j = i + 1; j < participants.length; j++) {
+            matches.push([participants[i], participants[j]]);
+        }
+    }
+
+    // Mischia l'ordine degli incontri
+    matches = matches.sort(() => Math.random() - 0.5);
+
+    // Resetta l'indice dei match
+    matchIndex = 0;
+
+    updateTable();
+    playNextMatch();
+    updateMatchCounter();
+}
+
+function updatePoints(participant) {
+    const pointsCell = document.getElementById(`points-${participant.name}`);
+    pointsCell.innerText = participant.points;
+
+    // Riordina i partecipanti in base ai punti
+    participants.sort((a, b) => b.points - a.points);
+
+    // Ricrea la tabella
+    updateTable();
+}
+
+function updateTable() {
+    const tableBody = document.querySelector("#tournament tbody");
+    tableBody.innerHTML = ""; // Pulisce il contenuto attuale
+
+    participants.forEach(participant => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${participant.name}</td>
+            <td>${participant.ability}</td>
+            <td id="points-${participant.name}">${participant.points}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function playNextMatch() {
+    if (matchIndex >= matches.length) return;
+
+    const match = matches[matchIndex];
+    const matchDiv = document.createElement("div");
+
+    const matchText = `
+<strong>Combattente 1:</strong> ${match[0].name} (${match[0].ability})<br>
+<strong>Combattente 2:</strong> ${match[1].name} (${match[1].ability})<br>
+<b>Descrivi lo scontro seguendo questi 7 passaggi:</b>
+1. Descrivi come inizia il combattimento.<br>
+2. Dettaglia la prima mossa significativa del Combattente 1.<br>
+3. Descrivi la reazione del Combattente 2 e la sua controffensiva.<br>
+4. Narra un punto di svolta in favore di uno dei due combattenti.<br>
+5. Descrivi il tentativo di ribaltare la situazione da parte dell'altro combattente.<br>
+6. Spiega come si arriva alla conclusione dello scontro.<br>
+7. <b>Indica chiaramente il vincitore dello scontro tra i due combattenti.<br>
+<b>Nota:</b> Descrivi tutto in maniera concisa, avvincente, originale e imprevidibile.<br>`;
+
+    matchDiv.innerHTML = matchText;
+
+    const copyButton = document.createElement("button");
+    copyButton.className = "btn btn-secondary mt-2 mb-3";
+    copyButton.innerText = "Copia Descrizione";
+    copyButton.onclick = () => {
+        navigator.clipboard.writeText(matchText.replace(/<\/?[^>]+(>|$)/g, ""))
+            
+            .catch(err => alert("Errore nel copiare il testo: " + err));
+    };
+
+    matchDiv.appendChild(copyButton);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "form-control mb-2";
+    input.placeholder = "Iniziale/Nome del vincitore";
+
+    const submitButton = document.createElement("button");
+    submitButton.className = "btn btn-primary";
+    submitButton.innerText = "Invio";
+    submitButton.onclick = () => {
+        const winnerName = input.value.trim();
+        if (winnerName.toLowerCase() === match[0].name[0].toLowerCase() || winnerName.toLowerCase() === match[0].name.toLowerCase()) {
+            match[0].points++;
+            updatePoints(match[0]);
+        } else if (winnerName.toLowerCase() === match[1].name[0].toLowerCase() || winnerName.toLowerCase() === match[1].name.toLowerCase()) {
+            match[1].points++;
+            updatePoints(match[1]);
+        } else {
+            alert("Nome del vincitore non valido!");
+            return;
+        }
+
+        matchDiv.remove();
+        matchIndex++;
+        updateMatchCounter();
+        playNextMatch();
+    };
+
+    matchDiv.appendChild(input);
+    matchDiv.appendChild(submitButton);
+
+    document.getElementById("tournament").appendChild(matchDiv);
+}
+
+function updateMatchCounter() {
+    const matchCounter = document.getElementById("matchCounter");
+    matchCounter.innerText = `Scontri giocati: ${matchIndex}/${matches.length}`;
+}
+
+function saveTournament() {
+    const tournamentState = {
+        participants: participants,
+        matches: matches,
+        matchIndex: matchIndex
+    };
+    const serializedState = JSON.stringify(tournamentState);
+    navigator.clipboard.writeText(serializedState)
+        .then(() => alert("Torneo salvato nella clipboard!"))
+        .catch(err => alert("Errore nel salvare il torneo: " + err));
+}
+
+function loadTournament() {
+    const serializedState = prompt("Inserisci i dati del torneo salvati:");
+    if (serializedState) {
+        try {
+            const tournamentState = JSON.parse(serializedState);
+            participants = tournamentState.participants;
+            matches = tournamentState.matches;
+            matchIndex = tournamentState.matchIndex;
+            updateTable();
+            updateMatchCounter();
+            playNextMatch();
+        } catch (err) {
+            alert("Errore nel caricare il torneo: " + err);
+        }
+    }
+}
+
+document.getElementById("generateButton").onclick = generateTournament;
+document.getElementById("saveButton").onclick = saveTournament;
+document.getElementById("loadButton").onclick = loadTournament;
+
+    </script>
+
+</body>
+</html>
