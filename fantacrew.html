@@ -136,12 +136,12 @@
                 <button class="btn btn-info" id="missione">Missione</button>
                 <button class="btn btn-warning" id="reclutamento-specifico">Reclutamento Specifico</button>
 				<select name="livello" id="livello-specifico">
-				  <option value="basso">basso</option>
+				  <option value="molto basso">molto basso</option>
+                  <option value="basso">basso</option>
+                  <option value="discreto">discreto</option>
 				  <option value="medio">medio</option>
-				  <option value="notevole">notevole</option>
-				  <option value="potente">potente</option>
-				  <option value="enorme">enorme</option>
-				  <option value="leggendario">leggendario</option>
+				  <option value="alto">alto</option>
+				  <option value="molto alto">molto alto</option>
 				</select>
             </div>
         </div>
@@ -208,27 +208,27 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td>Basso</td>
+					<td>Molto basso</td>
 					<td>$1</td>
 				</tr>
 				<tr>
-					<td>Medio</td>
+					<td>Basso</td>
 					<td>$2</td>
 				</tr>
 				<tr>
-					<td>Notevole</td>
+					<td>Discreto</td>
 					<td>$5</td>
 				</tr>
 				<tr>
-					<td>Potente</td>
+					<td>Medio</td>
 					<td>$10</td>
 				</tr>
 				<tr>
-					<td>Enorme</td>
+					<td>Alto</td>
 					<td>$20</td>
 				</tr>
 				<tr>
-					<td>Leggendario</td>
+					<td>Molto alto</td>
 					<td>$50</td>
 				</tr>
 			</tbody>
@@ -279,12 +279,12 @@
 					// Find the minimum of the two numbers
 					const minNum = Math.min(num1, num2);
 					
-					if (minNum == 1) {level = 'basso'}
-					else if (minNum == 2) {level = 'medio'}
-					else if (minNum == 3) {level = 'notevole'}
-					else if (minNum == 4) {level = 'potente'}
-					else if (minNum == 5) {level = 'enorme'}
-					else if (minNum == 6) {level = 'leggendario'}
+					if (minNum == 1) {level = 'molto basso'}
+					else if (minNum == 2) {level = 'basso'}
+					else if (minNum == 3) {level = 'discreto'}
+					else if (minNum == 4) {level = 'medio'}
+					else if (minNum == 5) {level = 'alto'}
+					else if (minNum == 6) {level = 'molto alto'}
 				}
 				
                 let text = `Reclutamento
