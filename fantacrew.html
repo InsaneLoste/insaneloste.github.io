@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantaCrew</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <style>
+		* {
+            margin: 3px; /* Increase margin for all elements */
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 900px;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #343a40;
+        }
+        .form-control, .btn {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-primary:hover {
+            background-color: #004494;
+            border-color: #004494;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .crew-list-row {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .remove-row {
+            color: #dc3545;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        .remove-row:hover {
+            text-decoration: underline;
+        }
+        .text-area {
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: left;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">FantaCrew</h1>
+
+        <!-- Input Fields -->
+        <div class="row mb-4">
+            <div class="col-12 mb-3">
+                <label for="ambientazione" class="form-label">Ambientazione</label>
+			</div>
+			<div class="col-12 mb-3">
+				<textarea id="ambientazione" class="form-control text-area" rows="8"  placeholder="Un mondo fantasy popolato da razze, creature, animali e mostri fantastici e inventati, a volte dotati di poteri magici"></textarea>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="denaro" class="form-label">Denaro</label>
+                <input type="text" class="form-control" id="denaro" placeholder="Inserisci il denaro">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="fama" class="form-label">Fama</label>
+                <input type="text" class="form-control" id="fama" placeholder="Inserisci la fama">
+            </div>
+        </div>
+		<hr/>
+        <!-- Crew List -->
+        <div class="mb-4">
+            <label for="crew-list" class="form-label">Lista della Crew</label>
+            <div id="crew-list" class="list-group">
+                <div class="list-group-item crew-list-row">
+                    <input type="text" class="form-control" placeholder="Nuovo personaggio">
+                    <button class="remove-row float-end">Elimina</button>
+                </div>
+            </div>
+            <button class="btn btn-primary mt-2" id="add-row">Aggiungi Personaggio</button>
+        </div>
+		<hr/>
+        <!-- Buttons for Actions -->
+        <div class="mb-4">
+            <div class="btn-group">
+                <button class="btn btn-success" id="reclutamento">Reclutamento</button>
+                <button class="btn btn-info" id="missione">Missione</button>
+                <button class="btn btn-warning" id="reclutamento-specifico">Reclutamento Specifico</button>
+				<select name="livello" id="livello-specifico">
+				  <option value="basso">basso</option>
+				  <option value="medio">medio</option>
+				  <option value="notevole">notevole</option>
+				  <option value="potente">potente</option>
+				  <option value="enorme">enorme</option>
+				  <option value="leggendario">leggendario</option>
+				</select>
+            </div>
+        </div>
+
+        <!-- Text Area for Generated Text -->
+        <div>
+            <textarea id="generated-text" class="form-control text-area" rows="6" readonly placeholder="Il prompt apparirà qui..."></textarea>
+        </div>
+		<div>
+            <button class="btn btn-secondary mt-2" id="copy-text">Copia Prompt</button>
+        </div>
+		<hr/>
+		<br>
+		<h4>Info livelli missione:</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Livello</th>
+					<th>Premio</th>
+					<th>Fama</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Semplice</td>
+					<td>$3</td>
+					<td>+1</td>
+				</tr>
+				<tr>
+					<td>Media</td>
+					<td>$6</td>
+					<td>+2</td>
+				</tr>
+				<tr>
+					<td>Impegnativa</td>
+					<td>$15</td>
+					<td>+3</td>
+				</tr>
+				<tr>
+					<td>Complessa</td>
+					<td>$30</td>
+					<td>+5</td>
+				</tr>
+				<tr>
+					<td>Ardua</td>
+					<td>$60</td>
+					<td>+7</td>
+				</tr>
+				<tr>
+					<td>Titanica</td>
+					<td>$150</td>
+					<td>+10</td>
+				</tr>
+			</tbody>
+		</table>
+		<br>
+		<h4>Info livelli reclutamento:</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Livello</th>
+					<th>Costo</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Basso</td>
+					<td>$1</td>
+				</tr>
+				<tr>
+					<td>Medio</td>
+					<td>$2</td>
+				</tr>
+				<tr>
+					<td>Notevole</td>
+					<td>$5</td>
+				</tr>
+				<tr>
+					<td>Potente</td>
+					<td>$10</td>
+				</tr>
+				<tr>
+					<td>Enorme</td>
+					<td>$20</td>
+				</tr>
+				<tr>
+					<td>Leggendario</td>
+					<td>$50</td>
+				</tr>
+			</tbody>
+		</table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Add new row to crew list
+            $('#add-row').click(function() {
+                $('#crew-list').append(`
+                    <div class="list-group-item crew-list-row">
+                        <input type="text" class="form-control" placeholder="Nuovo personaggio">
+                        <button class="remove-row float-end">Elimina</button>
+                    </div>
+                `);
+            });
+
+            // Remove row from crew list
+            $(document).on('click', '.remove-row', function() {
+                $(this).closest('.crew-list-row').remove();
+            });
+			
+			// Function to retrieve all character names
+			function getCharacters() {
+				var characters = [];
+				$('#crew-list .crew-list-row input').each(function() {
+					var value = $(this).val().trim();
+					if (value) {
+						characters.push(value);
+					}
+				});
+				return characters;
+			}
+			
+			function getRandomInt(min, max) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+
+            // Generate text for buttons
+            function generateReclutamento(level) {
+                let ambientazione = $('#ambientazione').val() || $('#ambientazione').attr('placeholder');
+				
+				if (level == 'random') {
+					const num1 = getRandomInt(1, 6);
+					const num2 = getRandomInt(1, 6);
+
+					// Find the minimum of the two numbers
+					const minNum = Math.min(num1, num2);
+					
+					if (minNum == 1) {level = 'basso'}
+					else if (minNum == 2) {level = 'medio'}
+					else if (minNum == 3) {level = 'notevole'}
+					else if (minNum == 4) {level = 'potente'}
+					else if (minNum == 5) {level = 'enorme'}
+					else if (minNum == 6) {level = 'leggendario'}
+				}
+				
+                let text = `Reclutamento
+
+Ambientazione: ${ambientazione}.
+
+Il tuo compito: genera un personaggio da reclutare in una squadra.
+
+La forza o potenza o armi del personaggio sono di livello: ${level}.
+
+Genera il personaggio in maniera molto concisa e molto originale.`;
+				
+                $('#generated-text').val(text);
+            }
+			
+			// Generate text for buttons
+            function generateMissione() {
+                let ambientazione = $('#ambientazione').val() || $('#ambientazione').attr('placeholder');
+				let personaggi = getCharacters();
+				
+				const num_mission = getRandomInt(1, 6);
+				
+				if (num_mission == 1) {mission = 'di eliminazione bersaglio o bersagli'}
+				else if (num_mission == 2) {mission = 'di scorta di qualcuno o di un gruppo'}
+				else if (num_mission == 3) {mission = 'di salvataggio ostaggio o ostaggi'}
+				else if (num_mission == 4) {mission = 'di sabotaggio o distruzione di un obiettivo'}
+				else if (num_mission == 5) {mission = 'di recupero di un oggetto o un bene'}
+				else if (num_mission == 6) {mission = 'di combattimento contro dei nemici'}
+				
+				const num1 = getRandomInt(1, 6);
+				const num2 = getRandomInt(1, 6);
+
+				// Find the minimum of the two numbers
+				const minNum = Math.min(num1, num2);
+				
+				if (minNum == 1) {level = 'semplice'}
+				else if (minNum == 2) {level = 'media'}
+				else if (minNum == 3) {level = 'impegnativa'}
+				else if (minNum == 4) {level = 'complessa'}
+				else if (minNum == 5) {level = 'ardua'}
+				else if (minNum == 6) {level = 'titanica'}				
+				
+                let text = `Missione
+
+Ambientazione: ${ambientazione}.
+
+Il tuo compito: genera e descrivi una missione ${mission}.
+
+La missione è di difficoltà: ${level}.
+
+La squadra che compie la missione è composta da: ${personaggi}.
+
+Descrivi lo scontro seguendo questi 8 passaggi:
+1. Descrivi in cosa consiste la missione.
+2. Dettaglia come la squadra inizia la missione.
+3. Descrivi cosa accade nella missione: avanzamento, difficoltà, imprevisti.
+4. Narra un punto di svolta positivo o negativo nella missione.
+5. Descrivi ulteriori avvenimenti: avanzamento, difficoltà, imprevisti.
+6. Spiega come si arriva alla conclusione della missione.
+7. Indica chiaramente l'esito della missione: Vittoria o Disfatta.
+8. Indica chiaramente se ci sono perdite nella squadra.
+
+Nota: Descrivi tutto in maniera concisa, avvincente, originale e imprevidibile.`;
+				
+                $('#generated-text').val(text);
+            }
+
+            $('#missione').click(function() {
+                generateMissione();
+            });
+
+            $('#reclutamento').click(function() {
+                generateReclutamento('random');
+            });
+
+            $('#reclutamento-specifico').click(function() {
+                generateReclutamento($('#livello-specifico').val());
+            });
+
+            // Copy text to clipboard
+            $('#copy-text').click(function() {
+                let text = $('#generated-text').val();
+                navigator.clipboard.writeText(text).then(function() {
+                    
+                }, function(err) {
+                    console.error('Errore nella copia del testo: ', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
