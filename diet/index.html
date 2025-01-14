@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlimentarSì</title>
+    <link href="../bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="text-center mb-4">AlimentarSì</h1>
+		<h4 class="text-center mb-4" id="week-range"></h4> <!-- Date della settimana -->
+
+        <!-- Navigazione settimane -->
+        <div class="d-flex justify-content-between mb-4">
+            <button id="prev-week" class="btn btn-outline-primary">Settimana precedente</button>
+            <button id="next-week" class="btn btn-outline-primary">Settimana successiva</button>
+        </div>
+
+        <!-- Sezione piatti della settimana -->
+        <h2 class="mb-3">Piatti della settimana</h2>
+        <div id="weekly-menu" class="row g-3">
+            <!-- Piatti saranno inseriti qui dinamicamente -->
+        </div>
+
+        <!-- Sezione lista della spesa -->
+        <h2 class="mt-5 mb-3">Lista della Spesa</h2>
+        <ul id="shopping-list" class="list-group">
+            <!-- Lista della spesa generata dinamicamente -->
+        </ul>
+    </div>
+	
+	<script>
+		// Funzione per ottenere la data del lunedì della settimana
+		function getStartOfWeek(date) {
+			const day = date.getDay(),
+				diff = date.getDate() - day + (day == 0 ? -6 : 1); // 0 è domenica, quindi lo spostiamo al lunedì
+			return new Date(date.setDate(diff));
+		}
+
+		// Funzione per formattare la data nel formato dd/mm
+		function formatDate(date) {
+			const day = date.getDate().toString().padStart(2, '0');
+			const month = (date.getMonth() + 1).toString().padStart(2, '0');
+			return `${day}/${month}`;
+		}
+
+		// Calcola l'intervallo della settimana
+		function setWeekRange() {
+			const today = new Date();
+			const startOfWeek = getStartOfWeek(new Date(today));
+			const endOfWeek = new Date(startOfWeek);
+			endOfWeek.setDate(startOfWeek.getDate() + 6); // Domenica della settimana
+
+			const startFormatted = formatDate(startOfWeek);
+			const endFormatted = formatDate(endOfWeek);
+
+			document.getElementById('week-range').textContent = `Lun ${startFormatted} - Dom ${endFormatted}`;
+		}
+
+		// Imposta la data della settimana quando la pagina viene caricata
+		setWeekRange();
+	</script>
+
+    <script>
+        // Funzione per calcolare il seme basato sulla data (settimana specifica)
+        function getSeedForWeek(year, week) {
+            return year * 100 + week; // Seme unico per anno e settimana
+        }
+
+        // Funzione per leggere il file "piatti.txt" (simulata qui per semplicità)
+        async function fetchDishes() {
+            // Simulazione contenuto file "piatti.txt"
+            const fileContent = `
+Insalata di bresaola e rucola
+bresaola, rucola, limone, parmigiano
+Disponi la bresaola su un piatto, aggiungi rucola, scaglie di parmigiano e condisci con succo di limone
+---
+Zucchine e tonno
+zucchine, tonno, pomodorini, philadelphia light
+Lessa le zucchine e servile con tonno, pomodorini e philadelphia
+---
+Petto di tacchino con spinaci al limone
+petto di tacchino, spinaci, limone
+Lessa gli spinaci, cuoci il petto di tacchino in padella e spruzza del limone
+---
+Vellutata vegetale con salmone affumicato
+vellutata, salmone affumicato, limone
+Prepara una vellutata vegetale, guarnisci con fettine di salmone
+---
+Uova strapazzate con bietole
+uova, bietole, parmigiano
+Lessa le bietole, strapazza le uova in padella con un pizzico di parmigiano
+---
+Insalata di pollo con cicoria
+petto di pollo, cicoria, limone
+Griglia il pollo, taglia a strisce e servi su un letto di cicoria con limone e un filo d'olio
+---
+Pasta integrale con pomodoro e tonno
+pasta integrale, salsa di pomodoro, tonno
+Prepara la salsa di pomodoro, unisci il tonno e condisci la pasta
+---
+Insalata di lenticchie e pomodorini
+lenticchie, pomodorini, rucola
+Cuoci le lenticchie, poi mescola con pomodorini tagliati e rucola, condisci con limone
+---
+Vellutata di e yogurt greco
+vellutata, yogurt greco
+Prepara una vellutata vegetale, poi mangia uno yogurt greco
+---
+Riso con speck e crauti
+riso, speck, crauti
+Cuoci il riso, saltalo con speck e crauti in padella
+---
+Pollo con peperoni
+petto di pollo, peperoni
+Lessa i peperoni, servili come contorno al pollo
+---
+Filetto di pesce bianco con spinaci
+pesce bianco, spinaci
+Cuoci il pesce bianco lessandolo e accompagnalo con spinaci al limone
+---
+Insalata di fagioli e pomodorini
+fagioli, pomodorini, rucola, limone
+Mescola fagioli cotti, pomodorini e rucola, condisci con olio e limone
+---
+Uova sode con cavolfiore
+uova, cavolfiore
+Cuoci le uova sode e il cavolfiore al vapore, servi insieme
+---
+Lenticchie con bietole e limone
+lenticchie, bietole, limone
+Cuoci lenticchie e bietole insieme, condisci con limone
+---
+`; // Aggiungere più piatti in questo formato...
+            const blocks = fileContent.split('---').map(block => block.trim()).filter(Boolean);
+            return blocks.map(block => {
+                const lines = block.split('\n');
+                return {
+                    name: lines[0],
+                    ingredients: lines[1].split(',').map(ing => ing.trim()),
+                    preparation: lines[2]
+                };
+            });
+        }
+
+        // Funzione per generare un numero casuale basato su un seme
+        function seededRandom(seed) {
+            let x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        // Funzione per estrarre piatti casualmente
+		function getWeeklyDishes(dishes, seed) {
+			const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato (Pranzo)", "Sabato (Cena)", "Domenica (Pranzo)", "Domenica (Cena)"];
+			let weeklyDishes = [];
+			let availableIndexes = [...Array(dishes.length).keys()]; // Indici disponibili
+
+			for (let i = 0; i < days.length; i++) {
+				let randomIndex = Math.floor(seededRandom(seed + i) * availableIndexes.length);
+				let dishIndex = availableIndexes[randomIndex];
+
+				weeklyDishes.push({ day: days[i], dish: dishes[dishIndex] });
+				availableIndexes.splice(availableIndexes.indexOf(dishIndex), 1); // Rimuovi l'indice scelto dalla lista disponibile
+			}
+
+			return weeklyDishes;
+		}
+
+
+        // Funzione per aggiornare il menu settimanale
+        function updateMenu(weeklyDishes) {
+            const menuContainer = document.getElementById('weekly-menu');
+            menuContainer.innerHTML = '';
+            weeklyDishes.forEach(({ day, dish }) => {
+                const col = document.createElement('div');
+                col.className = 'col-12 col-md-6';
+                col.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${day}: ${dish.name}</h5>
+                            <p class="card-text"><strong>Ingredienti:</strong> ${dish.ingredients.join(', ')}</p>
+                            <p class="card-text">${dish.preparation}</p>
+                        </div>
+                    </div>
+                `;
+                menuContainer.appendChild(col);
+            });
+        }
+
+        // Funzione per aggiornare la lista della spesa
+        function updateShoppingList(weeklyDishes) {
+            const shoppingList = document.getElementById('shopping-list');
+            shoppingList.innerHTML = '';
+            const ingredientCount = {};
+
+            weeklyDishes.forEach(({ dish }) => {
+                dish.ingredients.forEach(ingredient => {
+                    ingredientCount[ingredient] = (ingredientCount[ingredient] || 0) + 1;
+                });
+            });
+
+            Object.entries(ingredientCount).forEach(([ingredient, count]) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" class="form-check-input me-2">
+                        ${ingredient}
+                    </div>
+                    <span class="badge bg-primary rounded-pill">x${count}</span>
+                `;
+                shoppingList.appendChild(li);
+            });
+        }
+		
+		// Calcola la data del lunedì della settimana
+		function getStartOfWeekYW(year, week) {
+			const date = new Date(year, 0, 1); // Inizia dall'anno
+			const dayOfYear = (week - 1) * 7; // Ogni settimana ha 7 giorni
+			date.setDate(date.getDate() + dayOfYear);
+			const day = date.getDay();
+			const diff = date.getDate() - day + (day == 0 ? -6 : 1); // Porta al lunedì
+			return new Date(date.setDate(diff));
+		}
+		
+		 // Funzione per aggiornare la data della settimana visualizzata
+		function updateWeekRange() {
+			const startOfWeek = getStartOfWeekYW(currentYear, currentWeek+1);
+			const endOfWeek = new Date(startOfWeek);
+			endOfWeek.setDate(startOfWeek.getDate() + 6); // Domenica
+
+			const startFormatted = formatDate(startOfWeek);
+			const endFormatted = formatDate(endOfWeek);
+
+			document.getElementById('week-range').textContent = `Lun ${startFormatted} - Dom ${endFormatted}`;
+		}
+
+        // Gestione della navigazione delle settimane
+        let currentYear = new Date().getFullYear();
+        let currentWeek = Math.ceil((new Date() - new Date(currentYear, 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+
+        async function loadWeek(year, week) {
+            const dishes = await fetchDishes();
+            const seed = getSeedForWeek(year, week);
+            const weeklyDishes = getWeeklyDishes(dishes, seed);
+            updateMenu(weeklyDishes);
+            updateShoppingList(weeklyDishes);
+			updateWeekRange();
+        }
+
+        document.getElementById('prev-week').addEventListener('click', () => {
+            if (currentWeek === 1) {
+                currentYear--;
+                currentWeek = 52;
+            } else {
+                currentWeek--;
+            }
+            loadWeek(currentYear, currentWeek);
+        });
+
+        document.getElementById('next-week').addEventListener('click', () => {
+            if (currentWeek === 52) {
+                currentYear++;
+                currentWeek = 1;
+            } else {
+                currentWeek++;
+            }
+            loadWeek(currentYear, currentWeek);
+        });
+
+        // Carica la settimana corrente al primo avvio
+        loadWeek(currentYear, currentWeek);
+    </script>
+</body>
+</html>
