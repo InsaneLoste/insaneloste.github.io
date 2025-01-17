@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlimentarSì</title>
     <link href="../bootstrap.min.css" rel="stylesheet">
+	<style>
+		.card.inactive {
+			opacity: 0.5;
+		}
+	</style>
 </head>
 <body>
     <div class="container py-4">
         <h1 class="text-center mb-4">AlimentarSì</h1>
-		<h4 class="text-center mb-4" id="week-range"></h4> <!-- Date della settimana -->
+		<!-- <h4 class="text-center mb-4" id="week-range"></h4> --> <!-- Date della settimana -->
+		<h4 class="text-center mb-4" id="week-display"></h4>
 
         <!-- Navigazione settimane -->
         <div class="d-flex justify-content-between mb-4">
@@ -18,7 +24,7 @@
         </div>
 
         <!-- Sezione piatti della settimana -->
-        <h2 class="mb-3">Piatti della settimana</h2>
+        <h2 class="mb-3">Piatti della settimana, aggiungici riso, pane o pasta integrale</h2>
         <div id="weekly-menu" class="row g-3">
             <!-- Piatti saranno inseriti qui dinamicamente -->
         </div>
@@ -31,6 +37,73 @@
     </div>
 	
 	<script>
+		function getCurrentWeek() {
+			const now = new Date();
+			const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+			
+			// Shift so Monday is the first day (adjust for Sunday)
+			const diffToMonday = (dayOfWeek + 6) % 7; 
+			const monday = new Date(now);
+			monday.setDate(now.getDate() - diffToMonday);
+
+			const sunday = new Date(monday);
+			sunday.setDate(monday.getDate() + 6); // Add 6 days to get Sunday
+
+			return {
+				start: monday,
+				end: sunday
+			};
+		}
+		
+		let currentMonday; // Global variable to store the current week's Monday
+
+		function getWeekRangeFromMonday(monday) {
+			const sunday = new Date(monday);
+			sunday.setDate(monday.getDate() + 6); // Add 6 days to get Sunday
+
+			return {
+				start: monday,
+				end: sunday
+			};
+		}
+
+		function displayCurrentWeek() {
+			const { start, end } = getWeekRangeFromMonday(currentMonday);
+
+			// Format dates to DD/MM/YYYY
+			const options = { day: '2-digit', month: '2-digit' };
+			const startDate = start.toLocaleDateString('en-GB', options);
+			const endDate = end.toLocaleDateString('en-GB', options);
+
+			document.getElementById('week-display').textContent = `Lun ${startDate} - Dom ${endDate}`;
+		}
+
+		// Call the function when the page loads
+		document.addEventListener('DOMContentLoaded', function () {
+			// Initialize currentMonday to the start of the current week
+			const now = new Date();
+			const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+			const diffToMonday = (dayOfWeek + 6) % 7; // Adjust for Monday start
+			currentMonday = new Date(now);
+			currentMonday.setDate(now.getDate() - diffToMonday);
+
+			// Display the current week
+			displayCurrentWeek();
+		});
+
+		document.getElementById('prev-week').addEventListener('click', function () {
+			// Move back one week
+			currentMonday.setDate(currentMonday.getDate() - 7);
+			displayCurrentWeek();
+		});
+
+		document.getElementById('next-week').addEventListener('click', function () {
+			// Move forward one week
+			currentMonday.setDate(currentMonday.getDate() + 7);
+			displayCurrentWeek();
+		});
+
+	
 		// Funzione per ottenere la data del lunedì della settimana
 		function getStartOfWeek(date) {
 			const day = date.getDay(),
@@ -96,21 +169,21 @@ Insalata di pollo con cicoria
 petto di pollo, cicoria, limone
 Griglia il pollo, taglia a strisce e servi su un letto di cicoria con limone e un filo d'olio
 ---
-Pasta integrale con pomodoro e tonno
-pasta integrale, salsa di pomodoro, tonno
-Prepara la salsa di pomodoro, unisci il tonno e condisci la pasta
+Rape rosse e tonno
+rape rosse, tonno
+Prepara un piatto semplice con rape rosse e tonno
 ---
 Insalata di lenticchie e pomodorini
 lenticchie, pomodorini, rucola
 Cuoci le lenticchie, poi mescola con pomodorini tagliati e rucola, condisci con limone
 ---
-Vellutata di e yogurt greco
+Vellutata vegetale e yogurt greco
 vellutata, yogurt greco
 Prepara una vellutata vegetale, poi mangia uno yogurt greco
 ---
-Riso con speck e crauti
-riso, speck, crauti
-Cuoci il riso, saltalo con speck e crauti in padella
+Speck e crauti
+speck, crauti
+Prepara un piatto semplice con speck e crauti
 ---
 Pollo con peperoni
 petto di pollo, peperoni
@@ -168,25 +241,108 @@ Cuoci lenticchie e bietole insieme, condisci con limone
 		}
 
 
-        // Funzione per aggiornare il menu settimanale
-        function updateMenu(weeklyDishes) {
-            const menuContainer = document.getElementById('weekly-menu');
-            menuContainer.innerHTML = '';
-            weeklyDishes.forEach(({ day, dish }) => {
-                const col = document.createElement('div');
-                col.className = 'col-12 col-md-6';
-                col.innerHTML = `
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">${day}: ${dish.name}</h5>
-                            <p class="card-text"><strong>Ingredienti:</strong> ${dish.ingredients.join(', ')}</p>
-                            <p class="card-text">${dish.preparation}</p>
-                        </div>
-                    </div>
-                `;
-                menuContainer.appendChild(col);
-            });
-        }
+        // Funzione per gestire il click su una card
+		function toggleCard(card, dish, ingredientCount) {
+			const isInactive = card.classList.contains('inactive');
+
+			// Aggiungi o rimuovi la classe "inactive"
+			card.classList.toggle('inactive');
+
+			// Aggiorna il conteggio degli ingredienti
+			dish.ingredients.forEach(ingredient => {
+				if (isInactive) {
+					// Se la card era inattiva, incrementa il conteggio
+					ingredientCount[ingredient] = (ingredientCount[ingredient] || 0) + 1;
+				} else {
+					// Se la card diventa inattiva, decrementa il conteggio
+					if (ingredientCount[ingredient] > 0) {
+						ingredientCount[ingredient]--;
+					}
+				}
+			});
+
+			// Aggiorna la lista della spesa
+			updateShoppingListFromCount(ingredientCount);
+		}
+
+		// Funzione per aggiornare la lista della spesa dal conteggio
+		function updateShoppingListFromCount(ingredientCount) {
+			const shoppingList = document.getElementById('shopping-list');
+			shoppingList.innerHTML = '';
+
+			Object.entries(ingredientCount).forEach(([ingredient, count]) => {
+				if (count > 0) {
+					const li = document.createElement('li');
+					li.className = 'list-group-item d-flex justify-content-between align-items-center';
+					li.innerHTML = `
+						<div>
+							<input type="checkbox" class="form-check-input me-2">
+							${ingredient}
+						</div>
+						<span class="badge bg-primary rounded-pill">x${count}</span>
+					`;
+					shoppingList.appendChild(li);
+				}
+			});
+			const li1 = document.createElement('li');
+			li1.className = 'list-group-item d-flex justify-content-between align-items-center';
+			li1.innerHTML = `
+				<div>
+					<input type="checkbox" class="form-check-input me-2">
+				   pasta integrale
+				</div>
+				<span class="badge bg-primary rounded-pill">x1</span>
+			`;
+			shoppingList.appendChild(li1);
+			const li2 = document.createElement('li');
+			li2.className = 'list-group-item d-flex justify-content-between align-items-center';
+			li2.innerHTML = `
+				<div>
+					<input type="checkbox" class="form-check-input me-2">
+				   riso
+				</div>
+				<span class="badge bg-primary rounded-pill">x1</span>
+			`;
+			shoppingList.appendChild(li2);
+		}
+
+		// Modifica la funzione `updateMenu` per gestire il click su ogni card
+		function updateMenu(weeklyDishes) {
+			const menuContainer = document.getElementById('weekly-menu');
+			menuContainer.innerHTML = '';
+			const ingredientCount = {};
+
+			// Conta inizialmente tutti gli ingredienti
+			weeklyDishes.forEach(({ dish }) => {
+				dish.ingredients.forEach(ingredient => {
+					ingredientCount[ingredient] = (ingredientCount[ingredient] || 0) + 1;
+				});
+			});
+
+			// Aggiorna la lista della spesa
+			updateShoppingListFromCount(ingredientCount);
+
+			weeklyDishes.forEach(({ day, dish }) => {
+				const col = document.createElement('div');
+				col.className = 'col-12 col-md-6';
+				col.innerHTML = `
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">${day}: ${dish.name}</h5>
+							<p class="card-text"><strong>Ingredienti:</strong> ${dish.ingredients.join(', ')}</p>
+							<p class="card-text">${dish.preparation}</p>
+						</div>
+					</div>
+				`;
+				const card = col.querySelector('.card');
+
+				// Aggiungi l'evento di click alla card
+				card.addEventListener('click', () => toggleCard(card, dish, ingredientCount));
+
+				menuContainer.appendChild(col);
+			});
+		}
+
 
         // Funzione per aggiornare la lista della spesa
         function updateShoppingList(weeklyDishes) {
@@ -212,6 +368,26 @@ Cuoci lenticchie e bietole insieme, condisci con limone
                 `;
                 shoppingList.appendChild(li);
             });
+			const li1 = document.createElement('li');
+			li1.className = 'list-group-item d-flex justify-content-between align-items-center';
+			li1.innerHTML = `
+				<div>
+					<input type="checkbox" class="form-check-input me-2">
+				   pasta integrale
+				</div>
+				<span class="badge bg-primary rounded-pill">x1</span>
+			`;
+			shoppingList.appendChild(li1);
+			const li2 = document.createElement('li');
+			li2.className = 'list-group-item d-flex justify-content-between align-items-center';
+			li2.innerHTML = `
+				<div>
+					<input type="checkbox" class="form-check-input me-2">
+				   riso
+				</div>
+				<span class="badge bg-primary rounded-pill">x1</span>
+			`;
+			shoppingList.appendChild(li2);
         }
 		
 		// Calcola la data del lunedì della settimana
